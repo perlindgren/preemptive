@@ -1,0 +1,11 @@
+[package]
+name = "preemption"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+critical-section = { version = "1.2.0", features = ["restore-state-bool"] }
+
+[patch.crates-io]
+
+critical-section = { git = "https://github.com/perlindgren/critical-section.git" }
