@@ -4,8 +4,28 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+cortex-m = { version = "0.7.3", features = [
+    "critical-section-single-core",
+], optional = true }
+
+cortex-m-rt = { version = "0.7.5", optional = true }
+
 critical-section = { version = "1.2.0", features = ["restore-state-bool"] }
+panic-halt = "1.0.0"
 
 [patch.crates-io]
 
 critical-section = { git = "https://github.com/perlindgren/critical-section.git" }
+
+[features]
+default = ["std"]
+
+std = ["critical-section/std"]
+cm = ["cortex-m", "cortex-m-rt"]
+custom_cs = []
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"

@@ -15,3 +15,32 @@ This crate provides a workaround to 1., and the companying fork [critical-sectio
 This should be seen as a proof of concept and not a solution to the underlying problem. The unstructured `RawRestoreState` and its Rust feature based definition seems arbitrary chosen as motivation is lacking. Further investigation of the need for metadata (besides the binary state) is needed.
 
 The `Impl` trait definition is tailored to the exact needs for the current critical section implementation. By a more generic getter and setter design the support for preemptive regions would be facilitated. The workaround piggy backs on the definition of invalid state, which while working is unsatisfying.
+
+## Examples
+
+The examples include:
+
+- `cm_test`, testing of the stock `cortex_m` CS implementation. Backing `Impl` comes from stock `cortex-m`:
+
+  ```shell
+  cargo build --example cm_test --target thumbv7em-none-eabihf --no-default-features --features cm
+  ```
+
+- `cm_preempt`, testing of the new CS and Mutex implementation. Backing `Impl` comes from stock `cortex-m`:
+
+  ```shell
+  cargo build --example cm_preempt --target thumbv7em-none-eabihf --no-default-features --features cm
+  ```
+
+- `std_cs`, shows the new CS API with the stock mutex. Backing `Impl` comes from the stock `critical-section`.
+
+  ```shell
+  cargo run --example std_cs
+  ```
+
+- `std_preempt`, shows the new CS API with the stock mutex. Backing `Impl` comes from the stock `critical-section`.
+
+  ```shell
+  cargo run --example std_cs
+  ```
+  
