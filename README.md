@@ -16,6 +16,10 @@ This should be seen as a proof of concept and not a solution to the underlying p
 
 The `Impl` trait definition is tailored to the exact needs for the current critical section implementation. By a more generic getter and setter design the support for preemptive regions would be facilitated. The workaround piggy backs on the definition of invalid state, which while working is unsatisfying.
 
+## Mutex Design
+
+We propose a new Closure based Mutex API, taking the CS by reference instead of as owned value. The old consuming API relies on the CS being `Copy` + `Clone` and cause leaking in context of preemptive regions.
+
 ## Examples
 
 The examples include:
