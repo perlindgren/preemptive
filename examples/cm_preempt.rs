@@ -1,39 +1,50 @@
 #![no_std]
 #![no_main]
 
+use core::panic;
+
 use cortex_m as _;
 use cortex_m_rt::entry;
 use panic_halt as _;
 
-use preemption::{Mutex, preemptive_region};
+use preemption::Mutex;
 static MY_VALUE: Mutex<i32> = Mutex::new(0);
 
 #[entry]
 fn main() -> ! {
     critical_section::with(|mut cs| {
-        MY_VALUE.read(&cs, |data| *data);
-        MY_VALUE.write(&mut cs, |data| *data);
-
-        // Will error: cannot borrow `cs` as mutable more than once at a time
-        // MY_VALUE.write(&mut cs, |data| {
-        //     MY_VALUE.write(&mut cs, |data| *data);
-        //     *data += 1;
-        // });
-
-        preemptive_region::with(&mut cs, || {
-            // The CS token is unaccessible inside the closure
-            // MY_VALUE.read(&cs, |data| *data); // <-- compile error: borrow of moved value: `cs`
+        MY_VALUE.with_ref_mut(&mut cs, |data| {
+            cortex_m::asm::nop();
+            // Would error: cannot borrow `cs` as mutable more than once at a time
+            // MY_VALUE.with_ref(&cs, |data| *data);
+            *data += 1;
         });
 
-        critical_section::with(|mut cs| {
-            MY_VALUE.read(&cs, |data| *data); // <-- compile error: borrow of moved value: `cs`
-            preemptive_region::with(&mut cs, || {
-                // The CS token is unaccessible inside the closure
-                //MY_VALUE.read(&cs, |data| *data); // <-- compile error: borrow of moved value: `cs`
+        critical_section::preemption_within(&mut cs, || {
+            cortex_m::asm::nop();
+            // Would error: cannot borrow `cs` as immutable because it is also borrowed as mutable
+            // MY_VALUE.read(&cs, |data| *data);
+        });
+
+        cortex_m::asm::bkpt();
+
+        MY_VALUE.with_ref_mut(&mut cs, |data| *data += 2);
+
+        let r = critical_section::with(|mut cs| {
+            cortex_m::asm::nop();
+            let r = MY_VALUE.with_ref(&cs, |data| *data);
+            critical_section::preemption_within(&mut cs, || {
+                cortex_m::asm::nop();
+                // Would error: cannot borrow `cs` as immutable because it is also borrowed as mutable
+                // MY_VALUE.with_ref(&cs, |data| *data);
             });
+            cortex_m::asm::bkpt();
+            r
         });
 
-        // cs // <-- compile error: lifetime may not live long enough, thus cannot be be leaked
+        MY_VALUE.with_ref_mut(&mut cs, |data| *data = r);
+        cortex_m::asm::bkpt();
+        // cs // Would error: lifetime may not live long enough, thus cannot be be leaked
     });
 
     loop {}

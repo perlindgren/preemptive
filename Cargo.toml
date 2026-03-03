@@ -4,18 +4,24 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-cortex-m = { version = "0.7.3", features = [
+cortex-m = { version = "0.7.7", features = [
     "critical-section-single-core",
+    "inline-asm",
 ], optional = true }
 
 cortex-m-rt = { version = "0.7.5", optional = true }
 
-critical-section = { version = "1.2.0", features = ["restore-state-bool"] }
+critical-section = { version = "1.2.0" }
+# critical-section = { version = "1.2.0", features = ["restore-state-bool"] }
 panic-halt = "1.0.0"
 
 [patch.crates-io]
 
-critical-section = { git = "https://github.com/perlindgren/critical-section.git" }
+critical-section = { path = "../critical-section" }
+
+# critical-section = { git = "https://github.com/perlindgren/critical-section.git" }
+# cortex-m = { git = "https://github.com/perlindgren/critical-section.git" }
+cortex-m = { path = "../cortex-m/cortex-m" }
 
 [features]
 default = ["std"]
@@ -29,3 +35,6 @@ panic = "abort"
 
 [profile.release]
 panic = "abort"
+opt-level = 3
+lto = true
+# codegen-units = 1

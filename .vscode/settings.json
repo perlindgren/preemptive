@@ -1,8 +1,11 @@
 {
     "cSpell.ignoreWords": [
+        "bkpt",
+        "codegen",
         "eabihf",
         "forgeable",
         "leakable",
+        "target",
         "thumbv"
     ]
 }
